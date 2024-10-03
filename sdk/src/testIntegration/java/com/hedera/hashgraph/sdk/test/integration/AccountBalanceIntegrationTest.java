@@ -41,7 +41,7 @@ class AccountBalanceIntegrationTest {
     @DisplayName("can connect to previewnwet with TLS")
     void canConnectToPreviewnetWithTLS() throws Exception {
         var client = Client.forPreviewnet()
-            .setTransportSecurity(true);
+                .setTransportSecurity(true);
 
         boolean succeededAtLeastOnce = false;
 
@@ -50,10 +50,10 @@ class AccountBalanceIntegrationTest {
 
             try {
                 new AccountBalanceQuery()
-                    .setMaxAttempts(1)
-                    .setNodeAccountIds(Collections.singletonList(entry.getValue()))
-                    .setAccountId(entry.getValue())
-                    .execute(client);
+                        .setMaxAttempts(1)
+                        .setNodeAccountIds(Collections.singletonList(entry.getValue()))
+                        .setAccountId(entry.getValue())
+                        .execute(client);
                 System.out.println("succeeded for " + entry);
                 succeededAtLeastOnce = true;
             } catch (Throwable error) {
@@ -69,7 +69,7 @@ class AccountBalanceIntegrationTest {
     @DisplayName("can connect to testnet with TLS")
     void canConnectToTestnetWithTLS() throws Exception {
         var client = Client.forTestnet()
-            .setTransportSecurity(true);
+                .setTransportSecurity(true);
 
         boolean succeededAtLeastOnce = false;
 
@@ -78,10 +78,10 @@ class AccountBalanceIntegrationTest {
 
             try {
                 new AccountBalanceQuery()
-                    .setMaxAttempts(1)
-                    .setNodeAccountIds(Collections.singletonList(entry.getValue()))
-                    .setAccountId(entry.getValue())
-                    .execute(client);
+                        .setMaxAttempts(1)
+                        .setNodeAccountIds(Collections.singletonList(entry.getValue()))
+                        .setAccountId(entry.getValue())
+                        .execute(client);
                 System.out.println("succeeded for " + entry);
                 succeededAtLeastOnce = true;
             } catch (Throwable error) {
@@ -97,7 +97,7 @@ class AccountBalanceIntegrationTest {
     @DisplayName("can connect to mainnet with TLS")
     void canConnectToMainnetWithTLS() throws Exception {
         var client = Client.forMainnet()
-            .setTransportSecurity(true);
+                .setTransportSecurity(true);
 
         boolean succeededAtLeastOnce = false;
 
@@ -106,10 +106,10 @@ class AccountBalanceIntegrationTest {
 
             try {
                 new AccountBalanceQuery()
-                    .setMaxAttempts(1)
-                    .setNodeAccountIds(Collections.singletonList(entry.getValue()))
-                    .setAccountId(entry.getValue())
-                    .execute(client);
+                        .setMaxAttempts(1)
+                        .setNodeAccountIds(Collections.singletonList(entry.getValue()))
+                        .setAccountId(entry.getValue())
+                        .execute(client);
                 System.out.println("succeeded for " + entry);
                 succeededAtLeastOnce = true;
             } catch (Throwable error) {
@@ -126,9 +126,9 @@ class AccountBalanceIntegrationTest {
     @DisplayName("can connect to previewnet with certificate verification off")
     void cannotConnectToPreviewnetWhenNetworkNameIsNullAndCertificateVerificationIsEnabled() throws Exception {
         var client = Client.forPreviewnet()
-            .setTransportSecurity(true)
-            .setVerifyCertificates(true)
-            .setNetworkName(null);
+                .setTransportSecurity(true)
+                .setVerifyCertificates(true)
+                .setNetworkName(null);
 
         assertThat(client.getNetwork().isEmpty()).isFalse();
 
@@ -137,9 +137,9 @@ class AccountBalanceIntegrationTest {
 
             assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
                 new AccountBalanceQuery()
-                    .setNodeAccountIds(Collections.singletonList(entry.getValue()))
-                    .setAccountId(entry.getValue())
-                    .execute(client);
+                        .setNodeAccountIds(Collections.singletonList(entry.getValue()))
+                        .setAccountId(entry.getValue())
+                        .execute(client);
             });
         }
 
@@ -149,84 +149,84 @@ class AccountBalanceIntegrationTest {
     @Test
     @DisplayName("Can fetch balance for client operator")
     void canFetchBalanceForClientOperator() throws Exception {
-        var testEnv = new IntegrationTestEnv(1);
+        try (IntegrationTestEnv testEnv = new IntegrationTestEnv(1)) {
 
-        var balance = new AccountBalanceQuery()
-            .setAccountId(testEnv.operatorId)
-            .execute(testEnv.client);
+            var balance = new AccountBalanceQuery()
+                    .setAccountId(testEnv.operatorId)
+                    .execute(testEnv.client);
 
-        assertThat(balance.hbars.toTinybars() > 0).isTrue();
+            assertThat(balance.hbars.toTinybars() > 0).isTrue();
 
-        testEnv.close();
+        }
     }
 
     @Test
     @DisplayName("Can fetch cost for the query")
     void getCostBalanceForClientOperator() throws Exception {
-        var testEnv = new IntegrationTestEnv(1);
+        try (IntegrationTestEnv testEnv = new IntegrationTestEnv(1)) {
 
-        var balance = new AccountBalanceQuery()
-            .setAccountId(testEnv.operatorId)
-            .setMaxQueryPayment(new Hbar(1));
+            var balance = new AccountBalanceQuery()
+                    .setAccountId(testEnv.operatorId)
+                    .setMaxQueryPayment(new Hbar(1));
 
-        var cost = balance.getCost(testEnv.client);
+            var cost = balance.getCost(testEnv.client);
 
-        var accBalance = balance.setQueryPayment(cost).execute(testEnv.client);
+            var accBalance = balance.setQueryPayment(cost).execute(testEnv.client);
 
-        assertThat(accBalance.hbars.toTinybars() > 0).isTrue();
-        assertThat(cost.toTinybars()).isEqualTo(0);
+            assertThat(accBalance.hbars.toTinybars() > 0).isTrue();
+            assertThat(cost.toTinybars()).isEqualTo(0);
 
-        testEnv.close();
+        }
     }
 
     @Test
     @DisplayName("Can fetch cost for the query, big max set")
     void getCostBigMaxBalanceForClientOperator() throws Exception {
-        var testEnv = new IntegrationTestEnv(1);
+        try (IntegrationTestEnv testEnv = new IntegrationTestEnv(1)) {
 
-        var balance = new AccountBalanceQuery()
-            .setAccountId(testEnv.operatorId)
-            .setMaxQueryPayment(new Hbar(1000000));
+            var balance = new AccountBalanceQuery()
+                    .setAccountId(testEnv.operatorId)
+                    .setMaxQueryPayment(new Hbar(1000000));
 
-        var cost = balance.getCost(testEnv.client);
+            var cost = balance.getCost(testEnv.client);
 
-        var accBalance = balance.setQueryPayment(cost).execute(testEnv.client);
+            var accBalance = balance.setQueryPayment(cost).execute(testEnv.client);
 
-        assertThat(accBalance.hbars.toTinybars() > 0).isTrue();
+            assertThat(accBalance.hbars.toTinybars() > 0).isTrue();
 
-        testEnv.close();
+        }
     }
 
     @Test
     @DisplayName("Can fetch cost for the query, very small max set")
     void getCostSmallMaxBalanceForClientOperator() throws Exception {
-        var testEnv = new IntegrationTestEnv(1);
+        try (IntegrationTestEnv testEnv = new IntegrationTestEnv(1)) {
 
-        var balance = new AccountBalanceQuery()
-            .setAccountId(testEnv.operatorId)
-            .setMaxQueryPayment(Hbar.fromTinybars(1));
+            var balance = new AccountBalanceQuery()
+                    .setAccountId(testEnv.operatorId)
+                    .setMaxQueryPayment(Hbar.fromTinybars(1));
 
-        var cost = balance.getCost(testEnv.client);
+            var cost = balance.getCost(testEnv.client);
 
-        var accBalance = balance.setQueryPayment(cost).execute(testEnv.client);
+            var accBalance = balance.setQueryPayment(cost).execute(testEnv.client);
 
-        assertThat(accBalance.hbars.toTinybars() > 0).isTrue();
+            assertThat(accBalance.hbars.toTinybars() > 0).isTrue();
 
-        testEnv.close();
+        }
     }
 
     @Test
     @DisplayName("Cannot fetch balance for invalid account ID")
     void canNotFetchBalanceForInvalidAccountId() throws Exception {
-        var testEnv = new IntegrationTestEnv(1);
+        try (IntegrationTestEnv testEnv = new IntegrationTestEnv(1)) {
 
-        assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
-            new AccountBalanceQuery()
-                .setAccountId(AccountId.fromString("1.0.3"))
-                .execute(testEnv.client);
-        }).withMessageContaining(Status.INVALID_ACCOUNT_ID.toString());
+            assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
+                new AccountBalanceQuery()
+                        .setAccountId(AccountId.fromString("1.0.3"))
+                        .execute(testEnv.client);
+            }).withMessageContaining(Status.INVALID_ACCOUNT_ID.toString());
 
-        testEnv.close();
+        }
     }
 
     @Test
@@ -235,22 +235,22 @@ class AccountBalanceIntegrationTest {
         var testEnv = new IntegrationTestEnv(1).useThrowawayAccount();
 
         var response = new TokenCreateTransaction()
-            .setTokenName("ffff")
-            .setTokenSymbol("F")
-            .setInitialSupply(10000)
-            .setDecimals(50)
-            .setTreasuryAccountId(testEnv.operatorId)
-            .setAdminKey(testEnv.operatorKey)
-            .setSupplyKey(testEnv.operatorKey)
-            .setFreezeDefault(false)
-            .execute(testEnv.client);
+                .setTokenName("ffff")
+                .setTokenSymbol("F")
+                .setInitialSupply(10000)
+                .setDecimals(50)
+                .setTreasuryAccountId(testEnv.operatorId)
+                .setAdminKey(testEnv.operatorKey)
+                .setSupplyKey(testEnv.operatorKey)
+                .setFreezeDefault(false)
+                .execute(testEnv.client);
 
         var tokenId = Objects.requireNonNull(response.getReceipt(testEnv.client).tokenId);
 
         var query = new AccountBalanceQuery();
         var balance = query
-            .setAccountId(testEnv.operatorId)
-            .execute(testEnv.client);
+                .setAccountId(testEnv.operatorId)
+                .execute(testEnv.client);
 
         assertThat(balance.tokens.get(tokenId)).isEqualTo(10000);
         assertThat(balance.tokenDecimals.get(tokenId)).isEqualTo(50);

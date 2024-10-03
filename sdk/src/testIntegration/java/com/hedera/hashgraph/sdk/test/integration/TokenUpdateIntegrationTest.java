@@ -46,26 +46,26 @@ class TokenUpdateIntegrationTest {
         var testEnv = new IntegrationTestEnv(1).useThrowawayAccount();
 
         var response = new TokenCreateTransaction()
-            .setTokenName("ffff")
-            .setTokenSymbol("F")
-            .setDecimals(3)
-            .setInitialSupply(1000000)
-            .setTreasuryAccountId(testEnv.operatorId)
-            .setAdminKey(testEnv.operatorKey)
-            .setFreezeKey(testEnv.operatorKey)
-            .setWipeKey(testEnv.operatorKey)
-            .setKycKey(testEnv.operatorKey)
-            .setSupplyKey(testEnv.operatorKey)
-            .setPauseKey(testEnv.operatorKey)
-            .setMetadataKey(testEnv.operatorKey)
-            .setFreezeDefault(false)
-            .execute(testEnv.client);
+                .setTokenName("ffff")
+                .setTokenSymbol("F")
+                .setDecimals(3)
+                .setInitialSupply(1000000)
+                .setTreasuryAccountId(testEnv.operatorId)
+                .setAdminKey(testEnv.operatorKey)
+                .setFreezeKey(testEnv.operatorKey)
+                .setWipeKey(testEnv.operatorKey)
+                .setKycKey(testEnv.operatorKey)
+                .setSupplyKey(testEnv.operatorKey)
+                .setPauseKey(testEnv.operatorKey)
+                .setMetadataKey(testEnv.operatorKey)
+                .setFreezeDefault(false)
+                .execute(testEnv.client);
 
         var tokenId = Objects.requireNonNull(response.getReceipt(testEnv.client).tokenId);
 
         @Var var info = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(info.tokenId).isEqualTo(tokenId);
         assertThat(info.name).isEqualTo("ffff");
@@ -88,15 +88,15 @@ class TokenUpdateIntegrationTest {
         assertThat(info.defaultKycStatus).isNotNull().isFalse();
 
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setTokenName("aaaa")
-            .setTokenSymbol("A")
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setTokenName("aaaa")
+                .setTokenSymbol("A")
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         info = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(info.tokenId).isEqualTo(tokenId);
         assertThat(info.name).isEqualTo("aaaa");
@@ -126,27 +126,27 @@ class TokenUpdateIntegrationTest {
     @Test
     @DisplayName("Cannot update immutable token")
     void cannotUpdateImmutableToken() throws Exception {
-        var testEnv = new IntegrationTestEnv(1).useThrowawayAccount();
+        try (var testEnv = new IntegrationTestEnv(1).useThrowawayAccount()) {
 
-        var response = new TokenCreateTransaction()
-            .setTokenName("ffff")
-            .setTokenSymbol("F")
-            .setTreasuryAccountId(testEnv.operatorId)
-            .setFreezeDefault(false)
-            .execute(testEnv.client);
+            var response = new TokenCreateTransaction()
+                    .setTokenName("ffff")
+                    .setTokenSymbol("F")
+                    .setTreasuryAccountId(testEnv.operatorId)
+                    .setFreezeDefault(false)
+                    .execute(testEnv.client);
 
-        var tokenId = Objects.requireNonNull(response.getReceipt(testEnv.client).tokenId);
+            var tokenId = Objects.requireNonNull(response.getReceipt(testEnv.client).tokenId);
 
-        assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
-            new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setTokenName("aaaa")
-                .setTokenSymbol("A")
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
-        }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
+            assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
+                new TokenUpdateTransaction()
+                        .setTokenId(tokenId)
+                        .setTokenName("aaaa")
+                        .setTokenSymbol("A")
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client);
+            }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
 
-        testEnv.close();
+        }
     }
 
     /**
@@ -162,37 +162,37 @@ class TokenUpdateIntegrationTest {
 
         // create a fungible token with metadata
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-            .setTokenName("ffff")
-            .setTokenSymbol("F")
-            .setTokenMetadata(initialTokenMetadata)
-            .setTokenType(TokenType.FUNGIBLE_COMMON)
-            .setDecimals(3)
-            .setInitialSupply(1000000)
-            .setTreasuryAccountId(testEnv.operatorId)
-            .setAdminKey(testEnv.operatorKey)
-            .setFreezeDefault(false)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client)
-            .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.FUNGIBLE_COMMON)
+                        .setDecimals(3)
+                        .setInitialSupply(1000000)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(testEnv.operatorKey)
+                        .setFreezeDefault(false)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoAfterCreation = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterCreation.metadata).isEqualTo(initialTokenMetadata);
 
         // update token's metadata
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setTokenMetadata(updatedTokenMetadata)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setTokenMetadata(updatedTokenMetadata)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterMetadataUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterMetadataUpdate.metadata).isEqualTo(updatedTokenMetadata);
 
@@ -212,36 +212,36 @@ class TokenUpdateIntegrationTest {
 
         // create a non fungible token with metadata
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-            .setTokenName("ffff")
-            .setTokenSymbol("F")
-            .setTokenMetadata(initialTokenMetadata)
-            .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-            .setTreasuryAccountId(testEnv.operatorId)
-            .setAdminKey(testEnv.operatorKey)
-            .setSupplyKey(testEnv.operatorKey)
-            .setFreezeDefault(false)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client)
-            .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(testEnv.operatorKey)
+                        .setSupplyKey(testEnv.operatorKey)
+                        .setFreezeDefault(false)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoAfterCreation = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterCreation.metadata).isEqualTo(initialTokenMetadata);
 
         // update token's metadata
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setTokenMetadata(updatedTokenMetadata)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setTokenMetadata(updatedTokenMetadata)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterMetadataUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterMetadataUpdate.metadata).isEqualTo(updatedTokenMetadata);
 
@@ -262,40 +262,40 @@ class TokenUpdateIntegrationTest {
 
         // create a fungible token with metadata and metadata key
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("ffff")
-                .setTokenSymbol("F")
-                .setTokenMetadata(initialTokenMetadata)
-                .setTokenType(TokenType.FUNGIBLE_COMMON)
-                .setDecimals(3)
-                .setInitialSupply(1000000)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setMetadataKey(metadataKey)
-                .setFreezeDefault(false)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.FUNGIBLE_COMMON)
+                        .setDecimals(3)
+                        .setInitialSupply(1000000)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setMetadataKey(metadataKey)
+                        .setFreezeDefault(false)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoAfterCreation = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterCreation.metadata).isEqualTo(initialTokenMetadata);
         assertThat(tokenInfoAfterCreation.metadataKey.toString()).isEqualTo(metadataKey.getPublicKey().toString());
 
         // update token's metadata
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setTokenMetadata(updatedTokenMetadata)
-            .freezeWith(testEnv.client)
-            .sign(metadataKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setTokenMetadata(updatedTokenMetadata)
+                .freezeWith(testEnv.client)
+                .sign(metadataKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterMetadataUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterMetadataUpdate.metadata).isEqualTo(updatedTokenMetadata);
 
@@ -316,39 +316,39 @@ class TokenUpdateIntegrationTest {
 
         // create a non fungible token with metadata and metadata key
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("ffff")
-                .setTokenSymbol("F")
-                .setTokenMetadata(initialTokenMetadata)
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setSupplyKey(testEnv.operatorKey)
-                .setMetadataKey(metadataKey)
-                .setFreezeDefault(false)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setSupplyKey(testEnv.operatorKey)
+                        .setMetadataKey(metadataKey)
+                        .setFreezeDefault(false)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoAfterCreation = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterCreation.metadata).isEqualTo(initialTokenMetadata);
         assertThat(tokenInfoAfterCreation.metadataKey.toString()).isEqualTo(metadataKey.getPublicKey().toString());
 
         // update token's metadata
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setTokenMetadata(updatedTokenMetadata)
-            .freezeWith(testEnv.client)
-            .sign(metadataKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setTokenMetadata(updatedTokenMetadata)
+                .freezeWith(testEnv.client)
+                .sign(metadataKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterMetadataUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterMetadataUpdate.metadata).isEqualTo(updatedTokenMetadata);
 
@@ -367,37 +367,37 @@ class TokenUpdateIntegrationTest {
 
         // create a fungible token with metadata
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("ffff")
-                .setTokenSymbol("F")
-                .setTokenMetadata(initialTokenMetadata)
-                .setTokenType(TokenType.FUNGIBLE_COMMON)
-                .setDecimals(3)
-                .setInitialSupply(1000000)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(testEnv.operatorKey)
-                .setFreezeDefault(false)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.FUNGIBLE_COMMON)
+                        .setDecimals(3)
+                        .setInitialSupply(1000000)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(testEnv.operatorKey)
+                        .setFreezeDefault(false)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoAfterCreation = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterCreation.metadata).isEqualTo(initialTokenMetadata);
 
         // update token, but don't update metadata
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setTokenMemo("abc")
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setTokenMemo("abc")
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterMemoUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterMemoUpdate.metadata).isEqualTo(initialTokenMetadata);
 
@@ -416,36 +416,36 @@ class TokenUpdateIntegrationTest {
 
         // create a non fungible token with metadata
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("ffff")
-                .setTokenSymbol("F")
-                .setTokenMetadata(initialTokenMetadata)
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(testEnv.operatorKey)
-                .setSupplyKey(testEnv.operatorKey)
-                .setFreezeDefault(false)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(testEnv.operatorKey)
+                        .setSupplyKey(testEnv.operatorKey)
+                        .setFreezeDefault(false)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoAfterCreation = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterCreation.metadata).isEqualTo(initialTokenMetadata);
 
         // update token, but don't update metadata
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setTokenMemo("abc")
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setTokenMemo("abc")
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterMemoUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterMemoUpdate.metadata).isEqualTo(initialTokenMetadata);
 
@@ -465,37 +465,37 @@ class TokenUpdateIntegrationTest {
 
         // create a fungible token with metadata
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("ffff")
-                .setTokenSymbol("F")
-                .setTokenMetadata(initialTokenMetadata)
-                .setTokenType(TokenType.FUNGIBLE_COMMON)
-                .setDecimals(3)
-                .setInitialSupply(1000000)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(testEnv.operatorKey)
-                .setFreezeDefault(false)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.FUNGIBLE_COMMON)
+                        .setDecimals(3)
+                        .setInitialSupply(1000000)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(testEnv.operatorKey)
+                        .setFreezeDefault(false)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoAfterCreation = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterCreation.metadata).isEqualTo(initialTokenMetadata);
 
         // erase token metadata (update token with empty metadata)
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setTokenMetadata(emptyTokenMetadata)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setTokenMetadata(emptyTokenMetadata)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterSettingEmptyMetadata = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterSettingEmptyMetadata.metadata).isEqualTo(emptyTokenMetadata);
 
@@ -515,36 +515,36 @@ class TokenUpdateIntegrationTest {
 
         // create a non fungible token with metadata
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("ffff")
-                .setTokenSymbol("F")
-                .setTokenMetadata(initialTokenMetadata)
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(testEnv.operatorKey)
-                .setSupplyKey(testEnv.operatorKey)
-                .setFreezeDefault(false)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(testEnv.operatorKey)
+                        .setSupplyKey(testEnv.operatorKey)
+                        .setFreezeDefault(false)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoAfterCreation = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterCreation.metadata).isEqualTo(initialTokenMetadata);
 
         // erase token metadata (update token with empty metadata)
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setTokenMetadata(emptyTokenMetadata)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setTokenMetadata(emptyTokenMetadata)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterSettingEmptyMetadata = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterSettingEmptyMetadata.metadata).isEqualTo(emptyTokenMetadata);
 
@@ -558,40 +558,41 @@ class TokenUpdateIntegrationTest {
     @Test
     @DisplayName("Cannot update a fungible token with metadata when transaction is not signed with an admin or a metadata key")
     void cannotUpdateFungibleTokenMetadataWhenTransactionIsNotSignedWithMetadataKey() throws Exception {
-        var testEnv = new IntegrationTestEnv(1).useThrowawayAccount();
-        var initialTokenMetadata = new byte[]{1, 1, 1, 1, 1};
-        var updatedTokenMetadata = new byte[]{2, 2, 2, 2, 2};
-        var adminKey = PrivateKey.generateED25519();
-        var metadataKey = PrivateKey.generateED25519();
+        try (var testEnv = new IntegrationTestEnv(1).useThrowawayAccount()) {
 
-        // create a fungible token with metadata and metadata key
-        var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-            .setTokenName("ffff")
-            .setTokenSymbol("F")
-            .setTokenMetadata(initialTokenMetadata)
-            .setTokenType(TokenType.FUNGIBLE_COMMON)
-            .setTreasuryAccountId(testEnv.operatorId)
-            .setDecimals(3)
-            .setInitialSupply(1000000)
-            .setAdminKey(adminKey)
-            .setMetadataKey(metadataKey)
-            .freezeWith(testEnv.client)
-            .sign(adminKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client)
-            .tokenId
-        );
+            var initialTokenMetadata = new byte[]{1, 1, 1, 1, 1};
+            var updatedTokenMetadata = new byte[]{2, 2, 2, 2, 2};
+            var adminKey = PrivateKey.generateED25519();
+            var metadataKey = PrivateKey.generateED25519();
 
-        assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
-          new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setTokenMetadata(updatedTokenMetadata)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
-        }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
+            // create a fungible token with metadata and metadata key
+            var tokenId = Objects.requireNonNull(
+                    new TokenCreateTransaction()
+                            .setTokenName("ffff")
+                            .setTokenSymbol("F")
+                            .setTokenMetadata(initialTokenMetadata)
+                            .setTokenType(TokenType.FUNGIBLE_COMMON)
+                            .setTreasuryAccountId(testEnv.operatorId)
+                            .setDecimals(3)
+                            .setInitialSupply(1000000)
+                            .setAdminKey(adminKey)
+                            .setMetadataKey(metadataKey)
+                            .freezeWith(testEnv.client)
+                            .sign(adminKey)
+                            .execute(testEnv.client)
+                            .getReceipt(testEnv.client)
+                            .tokenId
+                        );
 
-        testEnv.close();
+            assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
+                new TokenUpdateTransaction()
+                        .setTokenId(tokenId)
+                        .setTokenMetadata(updatedTokenMetadata)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client);
+            }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
+
+        }
     }
 
     /**
@@ -609,28 +610,28 @@ class TokenUpdateIntegrationTest {
 
         // create a non fungible token with metadata and metadata key
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("ffff")
-                .setTokenSymbol("F")
-                .setTokenMetadata(initialTokenMetadata)
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(adminKey)
-                .setSupplyKey(testEnv.operatorKey)
-                .setMetadataKey(metadataKey)
-                .freezeWith(testEnv.client)
-                .sign(adminKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(adminKey)
+                        .setSupplyKey(testEnv.operatorKey)
+                        .setMetadataKey(metadataKey)
+                        .freezeWith(testEnv.client)
+                        .sign(adminKey)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setTokenMetadata(updatedTokenMetadata)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setTokenMetadata(updatedTokenMetadata)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         testEnv.close(tokenId);
@@ -649,25 +650,25 @@ class TokenUpdateIntegrationTest {
 
         // create a fungible token with metadata and without a metadata key and admin key
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("ffff")
-                .setTokenSymbol("F")
-                .setTokenMetadata(initialTokenMetadata)
-                .setTokenType(TokenType.FUNGIBLE_COMMON)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setDecimals(3)
-                .setInitialSupply(1000000)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.FUNGIBLE_COMMON)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setDecimals(3)
+                        .setInitialSupply(1000000)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setTokenMetadata(updatedTokenMetadata)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setTokenMetadata(updatedTokenMetadata)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
 
         testEnv.close(tokenId);
@@ -686,26 +687,25 @@ class TokenUpdateIntegrationTest {
 
         // create a non fungible token with metadata and without a metadata key and admin key
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("ffff")
-                .setTokenSymbol("F")
-                .setTokenMetadata(initialTokenMetadata)
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setSupplyKey(testEnv.operatorKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("ffff")
+                        .setTokenSymbol("F")
+                        .setTokenMetadata(initialTokenMetadata)
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setSupplyKey(testEnv.operatorKey)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setTokenMetadata(updatedTokenMetadata)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setTokenMetadata(updatedTokenMetadata)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
-
 
         testEnv.close(tokenId);
     }
@@ -731,29 +731,29 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(adminKey.getPublicKey())
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .freezeWith(testEnv.client)
-                .sign(adminKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(adminKey.getPublicKey())
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .freezeWith(testEnv.client)
+                        .sign(adminKey)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.adminKey.toString()).isEqualTo(adminKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
@@ -769,24 +769,24 @@ class TokenUpdateIntegrationTest {
         // Make a token immutable by removing all of its keys when updating them to an empty KeyList,
         // signing with an Admin Key, and setting the key verification mode to NO_VALIDATION
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setWipeKey(emptyKeyList)
-            .setKycKey(emptyKeyList)
-            .setFreezeKey(emptyKeyList)
-            .setPauseKey(emptyKeyList)
-            .setSupplyKey(emptyKeyList)
-            .setFeeScheduleKey(emptyKeyList)
-            .setMetadataKey(emptyKeyList)
-            .setAdminKey(emptyKeyList)
-            .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-            .freezeWith(testEnv.client)
-            .sign(adminKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setWipeKey(emptyKeyList)
+                .setKycKey(emptyKeyList)
+                .setFreezeKey(emptyKeyList)
+                .setPauseKey(emptyKeyList)
+                .setSupplyKey(emptyKeyList)
+                .setFeeScheduleKey(emptyKeyList)
+                .setMetadataKey(emptyKeyList)
+                .setAdminKey(emptyKeyList)
+                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                .freezeWith(testEnv.client)
+                .sign(adminKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterUpdate.adminKey).isNull();
         assertThat(tokenInfoAfterUpdate.wipeKey).isNull();
@@ -821,29 +821,29 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(adminKey.getPublicKey())
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .freezeWith(testEnv.client)
-                .sign(adminKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(adminKey.getPublicKey())
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .freezeWith(testEnv.client)
+                        .sign(adminKey)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.adminKey.toString()).isEqualTo(adminKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
@@ -859,23 +859,23 @@ class TokenUpdateIntegrationTest {
         // Remove all of token’s lower-privilege keys when updating them to an empty KeyList,
         // signing with an Admin Key, and setting the key verification mode to FULL_VALIDATION
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setWipeKey(emptyKeyList)
-            .setKycKey(emptyKeyList)
-            .setFreezeKey(emptyKeyList)
-            .setPauseKey(emptyKeyList)
-            .setSupplyKey(emptyKeyList)
-            .setFeeScheduleKey(emptyKeyList)
-            .setMetadataKey(emptyKeyList)
-            .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-            .freezeWith(testEnv.client)
-            .sign(adminKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setWipeKey(emptyKeyList)
+                .setKycKey(emptyKeyList)
+                .setFreezeKey(emptyKeyList)
+                .setPauseKey(emptyKeyList)
+                .setSupplyKey(emptyKeyList)
+                .setFeeScheduleKey(emptyKeyList)
+                .setMetadataKey(emptyKeyList)
+                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                .freezeWith(testEnv.client)
+                .sign(adminKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterUpdate.wipeKey).isNull();
         assertThat(tokenInfoAfterUpdate.kycKey).isNull();
@@ -909,29 +909,29 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(adminKey.getPublicKey())
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .freezeWith(testEnv.client)
-                .sign(adminKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(adminKey.getPublicKey())
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .freezeWith(testEnv.client)
+                        .sign(adminKey)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.adminKey.toString()).isEqualTo(adminKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
@@ -945,23 +945,23 @@ class TokenUpdateIntegrationTest {
         // Update all of token’s lower-privilege keys to an unusable key (i.e., all-zeros key),
         // signing with an Admin Key, and setting the key verification mode to FULL_VALIDATION
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setWipeKey(PublicKey.unusableKey())
-            .setKycKey(PublicKey.unusableKey())
-            .setFreezeKey(PublicKey.unusableKey())
-            .setPauseKey(PublicKey.unusableKey())
-            .setSupplyKey(PublicKey.unusableKey())
-            .setFeeScheduleKey(PublicKey.unusableKey())
-            .setMetadataKey(PublicKey.unusableKey())
-            .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-            .freezeWith(testEnv.client)
-            .sign(adminKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setWipeKey(PublicKey.unusableKey())
+                .setKycKey(PublicKey.unusableKey())
+                .setFreezeKey(PublicKey.unusableKey())
+                .setPauseKey(PublicKey.unusableKey())
+                .setSupplyKey(PublicKey.unusableKey())
+                .setFeeScheduleKey(PublicKey.unusableKey())
+                .setMetadataKey(PublicKey.unusableKey())
+                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                .freezeWith(testEnv.client)
+                .sign(adminKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterUpdate.wipeKey.toString()).isEqualTo(PublicKey.unusableKey().toString());
         assertThat(tokenInfoAfterUpdate.kycKey.toString()).isEqualTo(PublicKey.unusableKey().toString());
@@ -974,23 +974,23 @@ class TokenUpdateIntegrationTest {
         // Set all lower-privilege keys back by signing with an Admin Key,
         // and setting key verification mode to NO_VALIDATION
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setWipeKey(wipeKey.getPublicKey())
-            .setKycKey(kycKey.getPublicKey())
-            .setFreezeKey(freezeKey.getPublicKey())
-            .setPauseKey(pauseKey.getPublicKey())
-            .setSupplyKey(supplyKey.getPublicKey())
-            .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-            .setMetadataKey(metadataKey.getPublicKey())
-            .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-            .freezeWith(testEnv.client)
-            .sign(adminKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setWipeKey(wipeKey.getPublicKey())
+                .setKycKey(kycKey.getPublicKey())
+                .setFreezeKey(freezeKey.getPublicKey())
+                .setPauseKey(pauseKey.getPublicKey())
+                .setSupplyKey(supplyKey.getPublicKey())
+                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                .setMetadataKey(metadataKey.getPublicKey())
+                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                .freezeWith(testEnv.client)
+                .sign(adminKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterRevert = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterRevert.adminKey.toString()).isEqualTo(adminKey.getPublicKey().toString());
         assertThat(tokenInfoAfterRevert.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
@@ -1034,29 +1034,29 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(adminKey.getPublicKey())
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .freezeWith(testEnv.client)
-                .sign(adminKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(adminKey.getPublicKey())
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .freezeWith(testEnv.client)
+                        .sign(adminKey)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.adminKey.toString()).isEqualTo(adminKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
@@ -1070,30 +1070,30 @@ class TokenUpdateIntegrationTest {
         // Update all of token’s lower-privilege keys when signing with an Admin Key and new respective lower-privilege key,
         // and setting key verification mode to FULL_VALIDATION
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setWipeKey(newWipeKey.getPublicKey())
-            .setKycKey(newKycKey.getPublicKey())
-            .setFreezeKey(newFreezeKey.getPublicKey())
-            .setPauseKey(newPauseKey.getPublicKey())
-            .setSupplyKey(newSupplyKey.getPublicKey())
-            .setFeeScheduleKey(newFeeScheduleKey.getPublicKey())
-            .setMetadataKey(newMetadataKey.getPublicKey())
-            .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-            .freezeWith(testEnv.client)
-            .sign(adminKey)
-            .sign(newWipeKey)
-            .sign(newKycKey)
-            .sign(newFreezeKey)
-            .sign(newPauseKey)
-            .sign(newSupplyKey)
-            .sign(newFeeScheduleKey)
-            .sign(newMetadataKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setWipeKey(newWipeKey.getPublicKey())
+                .setKycKey(newKycKey.getPublicKey())
+                .setFreezeKey(newFreezeKey.getPublicKey())
+                .setPauseKey(newPauseKey.getPublicKey())
+                .setSupplyKey(newSupplyKey.getPublicKey())
+                .setFeeScheduleKey(newFeeScheduleKey.getPublicKey())
+                .setMetadataKey(newMetadataKey.getPublicKey())
+                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                .freezeWith(testEnv.client)
+                .sign(adminKey)
+                .sign(newWipeKey)
+                .sign(newKycKey)
+                .sign(newFreezeKey)
+                .sign(newPauseKey)
+                .sign(newSupplyKey)
+                .sign(newFeeScheduleKey)
+                .sign(newMetadataKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterUpdate.wipeKey.toString()).isEqualTo(newWipeKey.getPublicKey().toString());
         assertThat(tokenInfoAfterUpdate.kycKey.toString()).isEqualTo(newKycKey.getPublicKey().toString());
@@ -1125,29 +1125,29 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(adminKey.getPublicKey())
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .freezeWith(testEnv.client)
-                .sign(adminKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(adminKey.getPublicKey())
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .freezeWith(testEnv.client)
+                        .sign(adminKey)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.adminKey.toString()).isEqualTo(adminKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
@@ -1166,74 +1166,74 @@ class TokenUpdateIntegrationTest {
         // and setting the key verification mode to NO_VALIDATION
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setWipeKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setWipeKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setKycKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setKycKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFreezeKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFreezeKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setPauseKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setPauseKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setSupplyKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setSupplyKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFeeScheduleKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFeeScheduleKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setMetadataKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setMetadataKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setAdminKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setAdminKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
     }
 
@@ -1258,29 +1258,29 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(adminKey.getPublicKey())
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .freezeWith(testEnv.client)
-                .sign(adminKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(adminKey.getPublicKey())
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .freezeWith(testEnv.client)
+                        .sign(adminKey)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.adminKey.toString()).isEqualTo(adminKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
@@ -1297,74 +1297,74 @@ class TokenUpdateIntegrationTest {
         // and setting the key verification mode to NO_VALIDATION
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setWipeKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setWipeKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setKycKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setKycKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFreezeKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFreezeKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setPauseKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setPauseKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setSupplyKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setSupplyKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFeeScheduleKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFeeScheduleKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setMetadataKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setMetadataKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setAdminKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setAdminKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
     }
 
@@ -1383,23 +1383,23 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setAdminKey(adminKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .freezeWith(testEnv.client)
-                .sign(adminKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setAdminKey(adminKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .freezeWith(testEnv.client)
+                        .sign(adminKey)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.adminKey.toString()).isEqualTo(adminKey.getPublicKey().toString());
 
@@ -1407,13 +1407,13 @@ class TokenUpdateIntegrationTest {
         // signing with an Admin Key, and setting the key verification mode to NO_VALIDATION
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setAdminKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(adminKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setAdminKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(adminKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         testEnv.close(tokenId);
@@ -1439,26 +1439,26 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.kycKey.toString()).isEqualTo(kycKey.getPublicKey().toString());
@@ -1472,29 +1472,29 @@ class TokenUpdateIntegrationTest {
         // when signing with a respective lower-privilege key,
         // and setting the key verification mode to NO_VALIDATION
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setWipeKey(PublicKey.unusableKey())
-            .setKycKey(PublicKey.unusableKey())
-            .setFreezeKey(PublicKey.unusableKey())
-            .setPauseKey(PublicKey.unusableKey())
-            .setSupplyKey(PublicKey.unusableKey())
-            .setFeeScheduleKey(PublicKey.unusableKey())
-            .setMetadataKey(PublicKey.unusableKey())
-            .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-            .freezeWith(testEnv.client)
-            .sign(wipeKey)
-            .sign(kycKey)
-            .sign(freezeKey)
-            .sign(pauseKey)
-            .sign(supplyKey)
-            .sign(feeScheduleKey)
-            .sign(metadataKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setWipeKey(PublicKey.unusableKey())
+                .setKycKey(PublicKey.unusableKey())
+                .setFreezeKey(PublicKey.unusableKey())
+                .setPauseKey(PublicKey.unusableKey())
+                .setSupplyKey(PublicKey.unusableKey())
+                .setFeeScheduleKey(PublicKey.unusableKey())
+                .setMetadataKey(PublicKey.unusableKey())
+                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                .freezeWith(testEnv.client)
+                .sign(wipeKey)
+                .sign(kycKey)
+                .sign(freezeKey)
+                .sign(pauseKey)
+                .sign(supplyKey)
+                .sign(feeScheduleKey)
+                .sign(metadataKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterUpdate.wipeKey.toString()).isEqualTo(PublicKey.unusableKey().toString());
         assertThat(tokenInfoAfterUpdate.kycKey.toString()).isEqualTo(PublicKey.unusableKey().toString());
@@ -1536,26 +1536,26 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.kycKey.toString()).isEqualTo(kycKey.getPublicKey().toString());
@@ -1568,36 +1568,36 @@ class TokenUpdateIntegrationTest {
         // Update all of token’s lower-privilege keys when signing with an old respective lower-privilege key,
         // and setting key verification mode to NO_VALIDATION
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setWipeKey(newWipeKey.getPublicKey())
-            .setKycKey(newKycKey.getPublicKey())
-            .setFreezeKey(newFreezeKey.getPublicKey())
-            .setPauseKey(newPauseKey.getPublicKey())
-            .setSupplyKey(newSupplyKey.getPublicKey())
-            .setFeeScheduleKey(newFeeScheduleKey.getPublicKey())
-            .setMetadataKey(newMetadataKey.getPublicKey())
-            .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-            .freezeWith(testEnv.client)
-            .sign(wipeKey)
-            .sign(newWipeKey)
-            .sign(kycKey)
-            .sign(newKycKey)
-            .sign(freezeKey)
-            .sign(newFreezeKey)
-            .sign(pauseKey)
-            .sign(newPauseKey)
-            .sign(supplyKey)
-            .sign(newSupplyKey)
-            .sign(feeScheduleKey)
-            .sign(newFeeScheduleKey)
-            .sign(metadataKey)
-            .sign(newMetadataKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setWipeKey(newWipeKey.getPublicKey())
+                .setKycKey(newKycKey.getPublicKey())
+                .setFreezeKey(newFreezeKey.getPublicKey())
+                .setPauseKey(newPauseKey.getPublicKey())
+                .setSupplyKey(newSupplyKey.getPublicKey())
+                .setFeeScheduleKey(newFeeScheduleKey.getPublicKey())
+                .setMetadataKey(newMetadataKey.getPublicKey())
+                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                .freezeWith(testEnv.client)
+                .sign(wipeKey)
+                .sign(newWipeKey)
+                .sign(kycKey)
+                .sign(newKycKey)
+                .sign(freezeKey)
+                .sign(newFreezeKey)
+                .sign(pauseKey)
+                .sign(newPauseKey)
+                .sign(supplyKey)
+                .sign(newSupplyKey)
+                .sign(feeScheduleKey)
+                .sign(newFeeScheduleKey)
+                .sign(metadataKey)
+                .sign(newMetadataKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterUpdate.wipeKey.toString()).isEqualTo(newWipeKey.getPublicKey().toString());
         assertThat(tokenInfoAfterUpdate.kycKey.toString()).isEqualTo(newKycKey.getPublicKey().toString());
@@ -1637,26 +1637,26 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.kycKey.toString()).isEqualTo(kycKey.getPublicKey().toString());
@@ -1669,29 +1669,29 @@ class TokenUpdateIntegrationTest {
         // Update all of token’s lower-privilege keys when signing with an old respective lower-privilege key,
         // and setting key verification mode to NO_VALIDATION
         new TokenUpdateTransaction()
-            .setTokenId(tokenId)
-            .setWipeKey(newWipeKey.getPublicKey())
-            .setKycKey(newKycKey.getPublicKey())
-            .setFreezeKey(newFreezeKey.getPublicKey())
-            .setPauseKey(newPauseKey.getPublicKey())
-            .setSupplyKey(newSupplyKey.getPublicKey())
-            .setFeeScheduleKey(newFeeScheduleKey.getPublicKey())
-            .setMetadataKey(newMetadataKey.getPublicKey())
-            .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-            .freezeWith(testEnv.client)
-            .sign(wipeKey)
-            .sign(kycKey)
-            .sign(freezeKey)
-            .sign(pauseKey)
-            .sign(supplyKey)
-            .sign(feeScheduleKey)
-            .sign(metadataKey)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setTokenId(tokenId)
+                .setWipeKey(newWipeKey.getPublicKey())
+                .setKycKey(newKycKey.getPublicKey())
+                .setFreezeKey(newFreezeKey.getPublicKey())
+                .setPauseKey(newPauseKey.getPublicKey())
+                .setSupplyKey(newSupplyKey.getPublicKey())
+                .setFeeScheduleKey(newFeeScheduleKey.getPublicKey())
+                .setMetadataKey(newMetadataKey.getPublicKey())
+                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                .freezeWith(testEnv.client)
+                .sign(wipeKey)
+                .sign(kycKey)
+                .sign(freezeKey)
+                .sign(pauseKey)
+                .sign(supplyKey)
+                .sign(feeScheduleKey)
+                .sign(metadataKey)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         var tokenInfoAfterUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoAfterUpdate.wipeKey.toString()).isEqualTo(newWipeKey.getPublicKey().toString());
         assertThat(tokenInfoAfterUpdate.kycKey.toString()).isEqualTo(newKycKey.getPublicKey().toString());
@@ -1722,26 +1722,26 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.kycKey.toString()).isEqualTo(kycKey.getPublicKey().toString());
@@ -1759,79 +1759,79 @@ class TokenUpdateIntegrationTest {
         // and setting the key verification mode to NO_VALIDATION
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setWipeKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(wipeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setWipeKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(wipeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setKycKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(kycKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setKycKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(kycKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFreezeKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(freezeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFreezeKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(freezeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setPauseKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(pauseKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setPauseKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(pauseKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setSupplyKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(supplyKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setSupplyKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(supplyKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFeeScheduleKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(feeScheduleKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFeeScheduleKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(feeScheduleKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setMetadataKey(emptyKeyList)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(metadataKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setMetadataKey(emptyKeyList)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(metadataKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.TOKEN_IS_IMMUTABLE.toString());
     }
 
@@ -1855,26 +1855,26 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.kycKey.toString()).isEqualTo(kycKey.getPublicKey().toString());
@@ -1890,65 +1890,65 @@ class TokenUpdateIntegrationTest {
         // and setting the key verification mode to NO_VALIDATION
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setWipeKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setWipeKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setKycKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setKycKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFreezeKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFreezeKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setPauseKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setPauseKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setSupplyKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setSupplyKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFeeScheduleKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFeeScheduleKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setMetadataKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setMetadataKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
     }
 
@@ -1972,26 +1972,26 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.kycKey.toString()).isEqualTo(kycKey.getPublicKey().toString());
@@ -2007,79 +2007,79 @@ class TokenUpdateIntegrationTest {
         // and setting the key verification mode to FULL_VALIDATION
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setWipeKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(wipeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setWipeKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(wipeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setKycKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(kycKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setKycKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(kycKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFreezeKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(freezeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFreezeKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(freezeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setPauseKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(pauseKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setPauseKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(pauseKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setSupplyKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(supplyKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setSupplyKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(supplyKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFeeScheduleKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(feeScheduleKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFeeScheduleKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(feeScheduleKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setMetadataKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(metadataKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setMetadataKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(metadataKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
     }
 
@@ -2112,26 +2112,26 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.kycKey.toString()).isEqualTo(kycKey.getPublicKey().toString());
@@ -2147,86 +2147,86 @@ class TokenUpdateIntegrationTest {
         // and setting the key verification mode to FULL_VALIDATION
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setWipeKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(wipeKey)
-                .sign(newWipeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setWipeKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(wipeKey)
+                    .sign(newWipeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setKycKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(kycKey)
-                .sign(newKycKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setKycKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(kycKey)
+                    .sign(newKycKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFreezeKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(freezeKey)
-                .sign(newFreezeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFreezeKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(freezeKey)
+                    .sign(newFreezeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setPauseKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(pauseKey)
-                .sign(newPauseKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setPauseKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(pauseKey)
+                    .sign(newPauseKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setSupplyKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(supplyKey)
-                .sign(newSupplyKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setSupplyKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(supplyKey)
+                    .sign(newSupplyKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFeeScheduleKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(feeScheduleKey)
-                .sign(newFeeScheduleKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFeeScheduleKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(feeScheduleKey)
+                    .sign(newFeeScheduleKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setMetadataKey(PublicKey.unusableKey())
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(metadataKey)
-                .sign(newMetadataKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setMetadataKey(PublicKey.unusableKey())
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(metadataKey)
+                    .sign(newMetadataKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
     }
 
@@ -2259,26 +2259,26 @@ class TokenUpdateIntegrationTest {
 
         // Create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.kycKey.toString()).isEqualTo(kycKey.getPublicKey().toString());
@@ -2294,79 +2294,79 @@ class TokenUpdateIntegrationTest {
         // and setting the key verification mode to FULL_VALIDATION
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setWipeKey(newWipeKey)
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(wipeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setWipeKey(newWipeKey)
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(wipeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setKycKey(newKycKey)
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(kycKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setKycKey(newKycKey)
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(kycKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFreezeKey(newFreezeKey)
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(freezeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFreezeKey(newFreezeKey)
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(freezeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setPauseKey(newPauseKey)
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(pauseKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setPauseKey(newPauseKey)
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(pauseKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setSupplyKey(newSupplyKey)
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(supplyKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setSupplyKey(newSupplyKey)
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(supplyKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFeeScheduleKey(newFeeScheduleKey)
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(feeScheduleKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFeeScheduleKey(newFeeScheduleKey)
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(feeScheduleKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setMetadataKey(newMetadataKey)
-                .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(metadataKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setMetadataKey(newMetadataKey)
+                    .setKeyVerificationMode(TokenKeyValidation.FULL_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(metadataKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
     }
 
@@ -2390,26 +2390,26 @@ class TokenUpdateIntegrationTest {
 
         // create a non-fungible token
         var tokenId = Objects.requireNonNull(
-            new TokenCreateTransaction()
-                .setTokenName("Test NFT")
-                .setTokenSymbol("TNFT")
-                .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                .setTreasuryAccountId(testEnv.operatorId)
-                .setWipeKey(wipeKey.getPublicKey())
-                .setKycKey(kycKey.getPublicKey())
-                .setFreezeKey(freezeKey.getPublicKey())
-                .setPauseKey(pauseKey.getPublicKey())
-                .setSupplyKey(supplyKey.getPublicKey())
-                .setFeeScheduleKey(feeScheduleKey.getPublicKey())
-                .setMetadataKey(metadataKey.getPublicKey())
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client)
-                .tokenId
-        );
+                new TokenCreateTransaction()
+                        .setTokenName("Test NFT")
+                        .setTokenSymbol("TNFT")
+                        .setTokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .setTreasuryAccountId(testEnv.operatorId)
+                        .setWipeKey(wipeKey.getPublicKey())
+                        .setKycKey(kycKey.getPublicKey())
+                        .setFreezeKey(freezeKey.getPublicKey())
+                        .setPauseKey(pauseKey.getPublicKey())
+                        .setSupplyKey(supplyKey.getPublicKey())
+                        .setFeeScheduleKey(feeScheduleKey.getPublicKey())
+                        .setMetadataKey(metadataKey.getPublicKey())
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client)
+                        .tokenId
+                );
 
         var tokenInfoBeforeUpdate = new TokenInfoQuery()
-            .setTokenId(tokenId)
-            .execute(testEnv.client);
+                .setTokenId(tokenId)
+                .execute(testEnv.client);
 
         assertThat(tokenInfoBeforeUpdate.wipeKey.toString()).isEqualTo(wipeKey.getPublicKey().toString());
         assertThat(tokenInfoBeforeUpdate.kycKey.toString()).isEqualTo(kycKey.getPublicKey().toString());
@@ -2428,79 +2428,79 @@ class TokenUpdateIntegrationTest {
         // and setting key verification mode to NO_VALIDATION
         assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setWipeKey(structurallyInvalidKey)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(wipeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setWipeKey(structurallyInvalidKey)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(wipeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_WIPE_KEY.toString());
 
         assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setKycKey(structurallyInvalidKey)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(kycKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setKycKey(structurallyInvalidKey)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(kycKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_KYC_KEY.toString());
 
         assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFreezeKey(structurallyInvalidKey)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(freezeKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFreezeKey(structurallyInvalidKey)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(freezeKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_FREEZE_KEY.toString());
 
         assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setPauseKey(structurallyInvalidKey)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(pauseKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setPauseKey(structurallyInvalidKey)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(pauseKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_PAUSE_KEY.toString());
 
         assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setSupplyKey(structurallyInvalidKey)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(supplyKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setSupplyKey(structurallyInvalidKey)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(supplyKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SUPPLY_KEY.toString());
 
         assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setFeeScheduleKey(structurallyInvalidKey)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(feeScheduleKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setFeeScheduleKey(structurallyInvalidKey)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(feeScheduleKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_CUSTOM_FEE_SCHEDULE_KEY.toString());
 
         assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
             new TokenUpdateTransaction()
-                .setTokenId(tokenId)
-                .setMetadataKey(structurallyInvalidKey)
-                .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
-                .freezeWith(testEnv.client)
-                .sign(metadataKey)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setTokenId(tokenId)
+                    .setMetadataKey(structurallyInvalidKey)
+                    .setKeyVerificationMode(TokenKeyValidation.NO_VALIDATION)
+                    .freezeWith(testEnv.client)
+                    .sign(metadataKey)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_METADATA_KEY.toString());
     }
 }

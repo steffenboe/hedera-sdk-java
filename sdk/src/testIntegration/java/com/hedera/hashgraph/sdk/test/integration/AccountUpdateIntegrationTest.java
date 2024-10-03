@@ -46,14 +46,14 @@ class AccountUpdateIntegrationTest {
         var key2 = PrivateKey.generateED25519();
 
         var response = new AccountCreateTransaction()
-            .setKey(key1)
-            .execute(testEnv.client);
+                .setKey(key1)
+                .execute(testEnv.client);
 
         var accountId = Objects.requireNonNull(response.getReceipt(testEnv.client).accountId);
 
         @Var var info = new AccountInfoQuery()
-            .setAccountId(accountId)
-            .execute(testEnv.client);
+                .setAccountId(accountId)
+                .execute(testEnv.client);
 
         assertThat(info.accountId).isEqualTo(accountId);
         assertThat(info.isDeleted).isFalse();
@@ -64,17 +64,17 @@ class AccountUpdateIntegrationTest {
         assertThat(info.proxyReceived).isEqualTo(Hbar.ZERO);
 
         new AccountUpdateTransaction()
-            .setAccountId(accountId)
-            .setKey(key2.getPublicKey())
-            .freezeWith(testEnv.client)
-            .sign(key1)
-            .sign(key2)
-            .execute(testEnv.client)
-            .getReceipt(testEnv.client);
+                .setAccountId(accountId)
+                .setKey(key2.getPublicKey())
+                .freezeWith(testEnv.client)
+                .sign(key1)
+                .sign(key2)
+                .execute(testEnv.client)
+                .getReceipt(testEnv.client);
 
         info = new AccountInfoQuery()
-            .setAccountId(accountId)
-            .execute(testEnv.client);
+                .setAccountId(accountId)
+                .execute(testEnv.client);
 
         assertThat(info.accountId).isEqualTo(accountId);
         assertThat(info.isDeleted).isFalse();
@@ -90,14 +90,14 @@ class AccountUpdateIntegrationTest {
     @Test
     @DisplayName("Cannot update account when account ID is not set")
     void cannotUpdateAccountWhenAccountIdIsNotSet() throws Exception {
-        var testEnv = new IntegrationTestEnv(1);
+        try (var testEnv = new IntegrationTestEnv(1)) {
 
-        assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
-            new AccountUpdateTransaction()
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
-        }).withMessageContaining(Status.ACCOUNT_ID_DOES_NOT_EXIST.toString());
+            assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
+                new AccountUpdateTransaction()
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client);
+            }).withMessageContaining(Status.ACCOUNT_ID_DOES_NOT_EXIST.toString());
 
-        testEnv.close();
+        }
     }
 }

@@ -45,15 +45,15 @@ class AccountDeleteIntegrationTest {
         var key = PrivateKey.generateED25519();
 
         var response = new AccountCreateTransaction()
-            .setKey(key)
-            .setInitialBalance(new Hbar(1))
-            .execute(testEnv.client);
+                .setKey(key)
+                .setInitialBalance(new Hbar(1))
+                .execute(testEnv.client);
 
         var accountId = Objects.requireNonNull(response.getReceipt(testEnv.client).accountId);
 
         var info = new AccountInfoQuery()
-            .setAccountId(accountId)
-            .execute(testEnv.client);
+                .setAccountId(accountId)
+                .execute(testEnv.client);
 
         assertThat(info.accountId).isEqualTo(accountId);
         assertThat(info.isDeleted).isFalse();
@@ -69,16 +69,16 @@ class AccountDeleteIntegrationTest {
     @Test
     @DisplayName("Cannot delete invalid account ID")
     void cannotCreateAccountWithNoKey() throws Exception {
-        var testEnv = new IntegrationTestEnv(1);
+        try (var testEnv = new IntegrationTestEnv(1)) {
 
-        assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
-            new AccountDeleteTransaction()
-                .setTransferAccountId(testEnv.operatorId)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
-        }).withMessageContaining(Status.ACCOUNT_ID_DOES_NOT_EXIST.toString());
+            assertThatExceptionOfType(PrecheckStatusException.class).isThrownBy(() -> {
+                new AccountDeleteTransaction()
+                        .setTransferAccountId(testEnv.operatorId)
+                        .execute(testEnv.client)
+                        .getReceipt(testEnv.client);
+            }).withMessageContaining(Status.ACCOUNT_ID_DOES_NOT_EXIST.toString());
 
-        testEnv.close();
+        }
     }
 
     @Test
@@ -89,18 +89,18 @@ class AccountDeleteIntegrationTest {
         var key = PrivateKey.generateED25519();
 
         var response = new AccountCreateTransaction()
-            .setKey(key)
-            .setInitialBalance(new Hbar(1))
-            .execute(testEnv.client);
+                .setKey(key)
+                .setInitialBalance(new Hbar(1))
+                .execute(testEnv.client);
 
         var accountId = Objects.requireNonNull(response.getReceipt(testEnv.client).accountId);
 
         assertThatExceptionOfType(ReceiptStatusException.class).isThrownBy(() -> {
             new AccountDeleteTransaction()
-                .setAccountId(accountId)
-                .setTransferAccountId(testEnv.operatorId)
-                .execute(testEnv.client)
-                .getReceipt(testEnv.client);
+                    .setAccountId(accountId)
+                    .setTransferAccountId(testEnv.operatorId)
+                    .execute(testEnv.client)
+                    .getReceipt(testEnv.client);
         }).withMessageContaining(Status.INVALID_SIGNATURE.toString());
 
         testEnv.close(accountId, key);
